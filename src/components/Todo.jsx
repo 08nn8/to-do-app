@@ -1,9 +1,17 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Todoitems from "./Todoitems";
+import confetti from 'canvas-confetti';
 
 const Todo = () => {
-  const [todoList, setTodoList] = useState(localStorage.getItem("todos")?JSON.parse(localStorage.getItem("todos")) : []);
+  const [todoList, setTodoList] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem("todos")
+        ? JSON.parse(localStorage.getItem("todos"))
+        : [];
+    }
+    return [];
+  });
 
   const inputRef = useRef();
   const add = () => {
@@ -30,6 +38,14 @@ const Todo = () => {
   }
 
   const toggle = (id) => {
+    const todo = todoList.find(todo => todo.id === id);
+    if (todo && !todo.isComplete) {
+      confetti  ({
+        particleCount: 100,
+        spread: 70,
+        origin: {y: 0.6}
+      })
+    }
     setTodoList((prevTodos)=> {
       return prevTodos.map((todo) => {
         if (todo.id === id) {
@@ -55,9 +71,9 @@ const Todo = () => {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
           className="icon icon-tabler icons-tabler-outline icon-tabler-layout-list text-black"
         >
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -82,7 +98,7 @@ const Todo = () => {
       </div>
       <div>
       {todoList.map((item, index) => {
-        return <Todoitems key={index} text={item.text} id={item.id} isComplete={item.isComplete} deleteTodo={deleteTodo} toggle={toggle}  />
+        return <Todoitems key={item.id} text={item.text} id={item.id} isComplete={item.isComplete} deleteTodo={deleteTodo} toggle={toggle}  />
       })}
       </div>
     </div>
